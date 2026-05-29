@@ -33,6 +33,11 @@
 		{
 			"Name": "ModularGameplay",
 			"Enabled": true
+		},
+		{
+			"Name": "KalraKaranZombie",
+			"Enabled": true
 		}
+
 	]
 }
