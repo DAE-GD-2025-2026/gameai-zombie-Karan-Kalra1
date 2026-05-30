@@ -2,7 +2,8 @@
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Kismet/GameplayStatics.h"
+
+#include "../StudentPerceptor.h"
 
 // Starter project includes
 #include "Survivor/SurvivorPawn.h"
@@ -38,8 +39,18 @@ void UUpdateSurvivorWorldState::TickNode(
 	if (!BB)
 		return;
 
-	AActor* NearestZombie = FindNearestZombie(Pawn);
-	AActor* BestItem = FindBestItem(Pawn);
+	UStudentPerceptor* Perceptor = GetPerceptor(AIController, Pawn);
+
+	AActor* NearestZombie = nullptr;
+	AActor* BestItem = nullptr;
+
+	if (Perceptor)
+	{
+		const FVector PawnLocation = Pawn->GetActorLocation();
+
+		NearestZombie = Perceptor->GetNearestKnownZombie(PawnLocation);
+		BestItem = Perceptor->GetBestKnownItem(PawnLocation);
+	}
 
 	BB->SetValueAsObject(TEXT("TargetZombie"), NearestZombie);
 	BB->SetValueAsObject(TEXT("TargetItem"), BestItem);
@@ -52,24 +63,26 @@ void UUpdateSurvivorWorldState::TickNode(
 	BB->SetValueAsBool(TEXT("HasMedkit"), bHasMedkit);
 	BB->SetValueAsBool(TEXT("HasFood"), bHasFood);
 
-	float HealthPercent = 1.0f;
-	float StaminaPercent = 1.0f;
+	float HealthValue = 1.0f;
+	float StaminaValue = 1.0f;
 
 	if (UHealthComponent* Health = Pawn->GetComponentByClass<UHealthComponent>())
 	{
-		HealthPercent = Health->GetHealth();
+		HealthValue = Health->GetHealth();
 	}
 
 	if (UStaminaComponent* Stamina = Pawn->GetComponentByClass<UStaminaComponent>())
 	{
-		StaminaPercent = Stamina->GetCurrentStamina();
+		StaminaValue = Stamina->GetCurrentStamina();
 	}
 
-	BB->SetValueAsFloat(TEXT("HealthPercent"), HealthPercent);
-	BB->SetValueAsFloat(TEXT("StaminaPercent"), StaminaPercent);
+	BB->SetValueAsFloat(TEXT("HealthPercent"), HealthValue);
+	BB->SetValueAsFloat(TEXT("StaminaPercent"), StaminaValue);
 
-	const bool bNeedsHealing = HealthPercent < 0.45f;
-	const bool bNeedsStamina = StaminaPercent < 0.35f;
+	
+
+	const bool bNeedsHealing = HealthValue < 4.5f;
+	const bool bNeedsStamina = StaminaValue < 3.5f;
 
 	BB->SetValueAsBool(TEXT("NeedsHealing"), bNeedsHealing);
 	BB->SetValueAsBool(TEXT("NeedsStamina"), bNeedsStamina);
@@ -78,105 +91,47 @@ void UUpdateSurvivorWorldState::TickNode(
 
 	if (NearestZombie)
 	{
-		const float DistSq =
-			FVector::DistSquared(Pawn->GetActorLocation(), NearestZombie->GetActorLocation());
+		const float DistSq = FVector::DistSquared(
+			Pawn->GetActorLocation(),
+			NearestZombie->GetActorLocation()
+		);
 
-		bIsInDanger = DistSq < FMath::Square(750.f);
+		const bool bZombieVeryClose = DistSq < FMath::Square(600.f);
+		const bool bZombieCloseAndLowHealth =
+			DistSq < FMath::Square(1000.f) && bNeedsHealing;
+
+
+		bIsInDanger =
+			bZombieCloseAndLowHealth ||
+			(bZombieVeryClose && !bHasWeapon);
 	}
 
 	BB->SetValueAsBool(TEXT("IsInDanger"), bIsInDanger);
 }
 
-AActor* UUpdateSurvivorWorldState::FindNearestZombie(APawn* SurvivorPawn) const
+UStudentPerceptor* UUpdateSurvivorWorldState::GetPerceptor(
+	AAIController* AIController,
+	APawn* Pawn) const
 {
-	if (!SurvivorPawn)
-		return nullptr;
-
-	TArray<AActor*> Zombies;
-	UGameplayStatics::GetAllActorsOfClass(
-		SurvivorPawn->GetWorld(),
-		ABaseZombie::StaticClass(),
-		Zombies);
-
-	AActor* BestZombie = nullptr;
-	float BestDistSq = TNumericLimits<float>::Max();
-
-	const FVector SurvivorLocation = SurvivorPawn->GetActorLocation();
-
-	for (AActor* Zombie : Zombies)
+	if (AIController)
 	{
-		if (!Zombie)
-			continue;
-
-		const float DistSq = FVector::DistSquared(SurvivorLocation, Zombie->GetActorLocation());
-
-		if (DistSq < BestDistSq)
+		if (UStudentPerceptor* Perceptor =
+			AIController->GetComponentByClass<UStudentPerceptor>())
 		{
-			BestDistSq = DistSq;
-			BestZombie = Zombie;
+			return Perceptor;
 		}
 	}
 
-	return BestZombie;
-}
-
-AActor* UUpdateSurvivorWorldState::FindBestItem(APawn* SurvivorPawn) const
-{
-	if (!SurvivorPawn)
-		return nullptr;
-
-	TArray<AActor*> Items;
-	UGameplayStatics::GetAllActorsOfClass(
-		SurvivorPawn->GetWorld(),
-		ABaseItem::StaticClass(),
-		Items);
-
-	AActor* BestItem = nullptr;
-	float BestScore = -FLT_MAX;
-
-	const FVector SurvivorLocation = SurvivorPawn->GetActorLocation();
-
-	for (AActor* ItemActor : Items)
+	if (Pawn)
 	{
-		if (!ItemActor)
-			continue;
-
-		ABaseItem* Item = Cast<ABaseItem>(ItemActor);
-		if (!Item)
-			continue;
-
-		const float Distance = FVector::Dist(SurvivorLocation, Item->GetActorLocation());
-
-		float Score = 1000.f / FMath::Max(Distance, 1.f);
-
-		// Basic item priority
-		const FString ItemName = Item->GetName();
-
-		if (ItemName.Contains(TEXT("Pistol")) || ItemName.Contains(TEXT("Shotgun")))
+		if (UStudentPerceptor* Perceptor =
+			Pawn->GetComponentByClass<UStudentPerceptor>())
 		{
-			Score += 100.f;
-		}
-		else if (ItemName.Contains(TEXT("Medkit")))
-		{
-			Score += 80.f;
-		}
-		else if (ItemName.Contains(TEXT("Food")))
-		{
-			Score += 40.f;
-		}
-		else if (ItemName.Contains(TEXT("Garbage")))
-		{
-			Score -= 1000.f;
-		}
-
-		if (Score > BestScore)
-		{
-			BestScore = Score;
-			BestItem = Item;
+			return Perceptor;
 		}
 	}
 
-	return BestItem;
+	return nullptr;
 }
 
 bool UUpdateSurvivorWorldState::HasUsefulWeapon(APawn* SurvivorPawn) const
@@ -184,11 +139,12 @@ bool UUpdateSurvivorWorldState::HasUsefulWeapon(APawn* SurvivorPawn) const
 	if (!SurvivorPawn)
 		return false;
 
-	UInventoryComponent* Inventory = SurvivorPawn->GetComponentByClass<UInventoryComponent>();
+	UInventoryComponent* Inventory =
+		SurvivorPawn->GetComponentByClass<UInventoryComponent>();
+
 	if (!Inventory)
 		return false;
 
-	
 	for (AActor* Item : Inventory->GetInventory())
 	{
 		if (!Item)
@@ -196,7 +152,8 @@ bool UUpdateSurvivorWorldState::HasUsefulWeapon(APawn* SurvivorPawn) const
 
 		const FString Name = Item->GetName();
 
-		if (Name.Contains(TEXT("Pistol")) || Name.Contains(TEXT("Shotgun")))
+		if (Name.Contains(TEXT("Pistol")) ||
+			Name.Contains(TEXT("Shotgun")))
 		{
 			return true;
 		}
@@ -205,12 +162,16 @@ bool UUpdateSurvivorWorldState::HasUsefulWeapon(APawn* SurvivorPawn) const
 	return false;
 }
 
-bool UUpdateSurvivorWorldState::HasItemType(APawn* SurvivorPawn, const FString& ItemTypeName) const
+bool UUpdateSurvivorWorldState::HasItemType(
+	APawn* SurvivorPawn,
+	const FString& ItemTypeName) const
 {
 	if (!SurvivorPawn)
 		return false;
 
-	UInventoryComponent* Inventory = SurvivorPawn->GetComponentByClass<UInventoryComponent>();
+	UInventoryComponent* Inventory =
+		SurvivorPawn->GetComponentByClass<UInventoryComponent>();
+
 	if (!Inventory)
 		return false;
 
