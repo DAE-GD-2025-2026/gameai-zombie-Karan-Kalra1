@@ -43,13 +43,13 @@ EBTNodeResult::Type UBTTask_FindHouseExploreLocation::ExecuteTask(
 
 	UStudentPerceptor* Perceptor = GetPerceptor(AIController, Pawn);
 
-	// First priority: go to a remembered house.
+	// First priority go to a remembered house.
 	if (Perceptor && TryUseKnownHouse(OwnerComp, Pawn, Perceptor))
 	{
 		return EBTNodeResult::Succeeded;
 	}
 
-	// Fallback: random exploration.
+	// Fallback random exploration.
 	if (TryUseRandomReachablePoint(OwnerComp, Pawn))
 	{
 		return EBTNodeResult::Succeeded;
@@ -103,8 +103,8 @@ bool UBTTask_FindHouseExploreLocation::TryUseKnownHouse(
 	// Only choose unvisited houses.
 	AActor* House = Perceptor->GetBestUnvisitedHouse(PawnLocation);
 
-	// If no unvisited houses are known, do NOT go back to the same visited house.
-	// Let random exploration run instead.
+	
+	// Let random exploration run
 	if (!House)
 	{
 		BB->ClearValue(TEXT("TargetHouse"));
@@ -137,7 +137,7 @@ bool UBTTask_FindHouseExploreLocation::TryUseKnownHouse(
 	{
 		BB->SetValueAsVector(TargetLocationKey, ProjectedLocation.Location);
 
-		// IMPORTANT: MarkHouseVisited task needs this.
+		//MarkHouseVisited task setter
 		BB->SetValueAsObject(TEXT("TargetHouse"), House);
 
 		return true;
@@ -218,7 +218,7 @@ bool UBTTask_FindHouseExploreLocation::TryUseRandomReachablePoint(
 		return true;
 	}
 
-	// Last fallback: any reachable point nearby.
+	// Last fallback any reachable point nearby.
 	FNavLocation RandomLocation;
 	if (NavSys->GetRandomReachablePointInRadius(
 		PawnLocation,

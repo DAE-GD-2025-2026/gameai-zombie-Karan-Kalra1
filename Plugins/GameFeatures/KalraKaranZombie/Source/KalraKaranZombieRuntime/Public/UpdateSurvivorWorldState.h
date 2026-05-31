@@ -28,6 +28,9 @@ private:
 	bool HasUsefulWeapon(APawn* SurvivorPawn) const;
 	bool HasItemType(APawn* SurvivorPawn, const FString& ItemTypeName) const;
 
+	AActor* FindNearestPurgeZone(APawn* SurvivorPawn, float& OutDistance) const;
+	bool IsInventoryFull(APawn* SurvivorPawn) const;
+
 	float GetHealthValue(APawn* SurvivorPawn) const;
 	float GetStaminaValue(APawn* SurvivorPawn) const;
 

@@ -53,6 +53,13 @@ private:
 		FName LocationKey,
 		FName OptionalTargetActorKey = NAME_None) const;
 
+	bool TryUseShelterLocation(
+		UBehaviorTreeComponent& OwnerComp,
+		APawn* Pawn,
+		AActor* ShelterActor,
+		AActor* Zombie,
+		FName LocationKey) const;
+
 	bool TryFindPointAwayFromZombie(
 		UBehaviorTreeComponent& OwnerComp,
 		APawn* Pawn,

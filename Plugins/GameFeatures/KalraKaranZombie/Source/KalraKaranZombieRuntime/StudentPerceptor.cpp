@@ -353,8 +353,8 @@ AActor* UStudentPerceptor::GetBestKnownItem(
 	{
 		if (Entry.Type != EStudentMemoryType::Weapon &&
 			Entry.Type != EStudentMemoryType::Medkit &&
-			Entry.Type != EStudentMemoryType::Food &&
-			Entry.Type != EStudentMemoryType::Garbage)
+			Entry.Type != EStudentMemoryType::Food
+			)
 		{
 			continue;
 		}

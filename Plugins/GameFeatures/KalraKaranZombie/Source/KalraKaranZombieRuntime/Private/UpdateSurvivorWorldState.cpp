@@ -5,7 +5,7 @@
 
 #include "../StudentPerceptor.h"
 
-// Starter project includes
+
 #include "Survivor/SurvivorPawn.h"
 #include "Zombies/BaseZombie.h"
 #include "Items/BaseItem.h"
@@ -13,6 +13,7 @@
 #include "Common/HealthComponent.h"
 #include "Common/StaminaComponent.h"
 #include "Common/InventoryComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 UUpdateSurvivorWorldState::UUpdateSurvivorWorldState()
 {
@@ -20,7 +21,7 @@ UUpdateSurvivorWorldState::UUpdateSurvivorWorldState()
 	Interval = 0.25f;
 	RandomDeviation = 0.05f;
 
-	// Important because we store stuck-detection state per service instance.
+	
 	bCreateNodeInstance = true;
 }
 
@@ -55,6 +56,7 @@ void UUpdateSurvivorWorldState::TickNode(
 	const bool bHasWeapon = HasUsefulWeapon(Pawn);
 	const bool bHasMedkit = HasItemType(Pawn, TEXT("Medkit"));
 	const bool bHasFood = HasItemType(Pawn, TEXT("Food"));
+	const bool bInventoryFull = IsInventoryFull(Pawn);
 
 	AActor* NearestZombie = nullptr;
 	AActor* BestItem = nullptr;
@@ -75,12 +77,20 @@ void UUpdateSurvivorWorldState::TickNode(
 
 		NearestZombie = Perceptor->GetNearestKnownZombie(PawnLocation, false);
 
-		BestItem = Perceptor->GetBestKnownItem(
-			PawnLocation,
-			bNeedsHealing,
-			bNeedsStamina,
-			bHasWeapon
-		);
+		// Only select a pickup target if inventory is not full.
+		if (!bInventoryFull)
+		{
+			BestItem = Perceptor->GetBestKnownItem(
+				PawnLocation,
+				bNeedsHealing,
+				bNeedsStamina,
+				bHasWeapon
+			);
+		}
+		else
+		{
+			BestItem = nullptr;
+		}
 
 		NearbyZombieCount = Perceptor->GetKnownZombieCount(1000.f, PawnLocation);
 
@@ -115,16 +125,16 @@ void UUpdateSurvivorWorldState::TickNode(
 	// Improved danger logic
 	// ---------------------------------------------------------------------
 
-	const bool bCriticalHealth = HealthValue < 25.f;
-	const bool bLowHealth = HealthValue < 45.f;
+	const bool bCriticalHealth = HealthValue < 2.5f;
+	const bool bLowHealth = HealthValue < 4.5f;
 
 	const bool bExtremeThreat = ThreatLevel >= 0.9f;
 	const bool bDangerNoWeapon = !bHasWeapon && ThreatLevel >= 0.55f;
 	const bool bDangerLowHealth = bLowHealth && ThreatLevel >= 0.45f;
 	const bool bSurrounded = NearbyZombieCount >= 3;
 
-	// Allow pickup to finish if standing beside an item.
 	bool bNearTargetItem = false;
+
 	if (AActor* TargetItem = Cast<AActor>(BB->GetValueAsObject(TEXT("TargetItem"))))
 	{
 		const float DistSq = FVector::DistSquared(
@@ -183,11 +193,21 @@ void UUpdateSurvivorWorldState::TickNode(
 	// ---------------------------------------------------------------------
 
 	BB->SetValueAsObject(TEXT("TargetZombie"), NearestZombie);
-	BB->SetValueAsObject(TEXT("TargetItem"), BestItem);
+
+	// Do not keep an item target if inventory is full.
+	if (bInventoryFull)
+	{
+		BB->ClearValue(TEXT("TargetItem"));
+	}
+	else
+	{
+		BB->SetValueAsObject(TEXT("TargetItem"), BestItem);
+	}
 
 	BB->SetValueAsBool(TEXT("HasWeapon"), bHasWeapon);
 	BB->SetValueAsBool(TEXT("HasMedkit"), bHasMedkit);
 	BB->SetValueAsBool(TEXT("HasFood"), bHasFood);
+	BB->SetValueAsBool(TEXT("InventoryFull"), bInventoryFull);
 
 	BB->SetValueAsFloat(TEXT("HealthPercent"), HealthValue);
 	BB->SetValueAsFloat(TEXT("StaminaPercent"), StaminaValue);
@@ -335,6 +355,8 @@ float UUpdateSurvivorWorldState::GetStaminaValue(APawn* SurvivorPawn) const
 	return 100.f;
 }
 
+
+
 float UUpdateSurvivorWorldState::CalculateThreatLevel(
 	APawn* SurvivorPawn,
 	AActor* NearestZombie,
@@ -352,7 +374,7 @@ float UUpdateSurvivorWorldState::CalculateThreatLevel(
 
 	float Threat = 0.f;
 
-	// Distance threat: close zombies are dangerous.
+	// Distance threat close zombies are dangerous.
 	if (Distance < 300.f)
 	{
 		Threat += 0.8f;
@@ -386,4 +408,29 @@ float UUpdateSurvivorWorldState::CalculateThreatLevel(
 	}
 
 	return FMath::Clamp(Threat, 0.f, 1.f);
+}
+
+bool UUpdateSurvivorWorldState::IsInventoryFull(APawn* SurvivorPawn) const
+{
+	if (!SurvivorPawn)
+		return true;
+
+	UInventoryComponent* Inventory =
+		SurvivorPawn->GetComponentByClass<UInventoryComponent>();
+
+	if (!Inventory)
+		return true;
+
+	const TArray<ABaseItem*>& Items = Inventory->GetInventory();
+
+	for (int32 i = 0; i < Inventory->GetInventoryCapacity(); ++i)
+	{
+		if (i >= Items.Num())
+			return false;
+
+		if (!Items[i])
+			return false;
+	}
+
+	return true;
 }

@@ -89,9 +89,39 @@ EBTNodeResult::Type UBTTask_FindBestSurvivalLocation::ExecuteTask(
 		}
 	}
 
-	// IMPORTANT:
-	// Do NOT flee to houses here.
-	// Houses are for exploration. Using houses as flee targets caused camping/freezing loops.
+	const bool bShouldUseEmergencyShelter =
+		(!bHasWeapon) || bNeedsHealing;
+
+	// 3. If no useful item info exists, use a house as emergency shelter.
+	if (Perceptor && bShouldUseEmergencyShelter)
+	{
+		if (AActor* House = Perceptor->GetBestUnvisitedHouse(PawnLocation))
+		{
+			AActor* Zombie = Cast<AActor>(BB->GetValueAsObject(TargetZombieKey));
+
+			if (TryUseShelterLocation(OwnerComp, Pawn, House, Zombie, SafeLocationKey))
+			{
+				if (GEngine)
+				{
+					GEngine->AddOnScreenDebugMessage(
+						-1,
+						1.f,
+						FColor::Green,
+						TEXT("Flee target: emergency house shelter")
+					);
+				}
+
+				return EBTNodeResult::Succeeded;
+			}
+		}
+	}
+
+	BB->ClearValue(TEXT("TargetHouse"));
+
+	// rotate slightly so AIPerception can discover houses/items while escaping.
+	FRotator ScanRotation = Pawn->GetActorRotation();
+	ScanRotation.Yaw += FMath::RandBool() ? 90.f : -90.f;
+	Pawn->SetActorRotation(ScanRotation);
 
 	// 3. Otherwise run directly away from the zombie.
 	AActor* Zombie = Cast<AActor>(BB->GetValueAsObject(TargetZombieKey));
@@ -103,7 +133,7 @@ EBTNodeResult::Type UBTTask_FindBestSurvivalLocation::ExecuteTask(
 		}
 	}
 
-	// 4. Last fallback: random reachable point.
+	// 4. Last fallback random reachable point.
 	if (TryFindRandomFallback(OwnerComp, Pawn))
 	{
 		return EBTNodeResult::Succeeded;
@@ -196,6 +226,78 @@ bool UBTTask_FindBestSurvivalLocation::TryUseActorLocation(
 	{
 		BB->SetValueAsObject(OptionalTargetActorKey, Actor);
 	}
+
+	return true;
+}
+
+bool UBTTask_FindBestSurvivalLocation::TryUseShelterLocation(
+	UBehaviorTreeComponent& OwnerComp,
+	APawn* Pawn,
+	AActor* ShelterActor,
+	AActor* Zombie,
+	FName LocationKey) const
+{
+	if (!Pawn || !ShelterActor)
+		return false;
+
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	if (!BB)
+		return false;
+
+	AAIController* AIController = OwnerComp.GetAIOwner();
+	if (!AIController)
+		return false;
+
+	UNavigationSystemV1* NavSys =
+		FNavigationSystem::GetCurrent<UNavigationSystemV1>(Pawn->GetWorld());
+
+	if (!NavSys)
+		return false;
+
+	const FVector PawnLocation = Pawn->GetActorLocation();
+	const FVector ShelterLocation = ShelterActor->GetActorLocation();
+
+	FNavLocation ProjectedLocation;
+
+	const bool bProjected = NavSys->ProjectPointToNavigation(
+		ShelterLocation,
+		ProjectedLocation,
+		FVector(NavProjectionExtent, NavProjectionExtent, NavProjectionExtent));
+
+	if (!bProjected)
+		return false;
+
+	const float DistanceFromPawn = FVector::Dist(
+		PawnLocation,
+		ProjectedLocation.Location);
+
+	if (DistanceFromPawn < MinMoveDistance)
+		return false;
+
+	UNavigationPath* Path = NavSys->FindPathToLocationSynchronously(
+		Pawn->GetWorld(),
+		PawnLocation,
+		ProjectedLocation.Location,
+		Pawn);
+
+	if (!Path || !Path->IsValid() || Path->PathPoints.Num() <= 1)
+		return false;
+
+	if (Zombie)
+	{
+		const float CurrentDistanceFromZombie =
+			FVector::Dist(PawnLocation, Zombie->GetActorLocation());
+
+		const float ShelterDistanceFromZombie =
+			FVector::Dist(ProjectedLocation.Location, Zombie->GetActorLocation());
+
+		// Do not flee to a shelter that is closer to the zombie than we are now.
+		if (ShelterDistanceFromZombie <= CurrentDistanceFromZombie + 200.f)
+			return false;
+	}
+
+	BB->SetValueAsVector(LocationKey, ProjectedLocation.Location);
+	BB->SetValueAsObject(TEXT("TargetHouse"), ShelterActor);
 
 	return true;
 }

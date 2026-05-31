@@ -1,0 +1,41 @@
+#include "BTTask_ScanForTargets.h"
+
+#include "AIController.h"
+
+UBTTask_ScanForTargets::UBTTask_ScanForTargets()
+{
+	NodeName = TEXT("Scan For Targets");
+}
+
+EBTNodeResult::Type UBTTask_ScanForTargets::ExecuteTask(
+	UBehaviorTreeComponent& OwnerComp,
+	uint8* NodeMemory)
+{
+	AAIController* AIController = OwnerComp.GetAIOwner();
+	if (!AIController || !AIController->GetPawn())
+		return EBTNodeResult::Failed;
+
+	APawn* Pawn = AIController->GetPawn();
+
+	const float RandomRotation =
+		FMath::RandRange(MinRotationAmount, MaxRotationAmount);
+
+	const float DirectionSign = FMath::RandBool() ? 1.f : -1.f;
+
+	FRotator NewRotation = Pawn->GetActorRotation();
+	NewRotation.Yaw += RandomRotation * DirectionSign;
+
+	Pawn->SetActorRotation(NewRotation);
+
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			0.5f,
+			FColor::Cyan,
+			TEXT("Scanning aggressively")
+		);
+	}
+
+	return EBTNodeResult::Succeeded;
+}
