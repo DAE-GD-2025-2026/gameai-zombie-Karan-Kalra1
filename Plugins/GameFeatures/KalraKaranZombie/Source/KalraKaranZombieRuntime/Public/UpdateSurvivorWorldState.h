@@ -4,7 +4,9 @@
 #include "BehaviorTree/BTService.h"
 #include "UpdateSurvivorWorldState.generated.h"
 
+
 class UStudentPerceptor;
+class UInventoryComponent;
 
 UCLASS()
 class KALRAKARANZOMBIERUNTIME_API UUpdateSurvivorWorldState : public UBTService
@@ -25,4 +27,20 @@ private:
 
 	bool HasUsefulWeapon(APawn* SurvivorPawn) const;
 	bool HasItemType(APawn* SurvivorPawn, const FString& ItemTypeName) const;
+
+	float GetHealthValue(APawn* SurvivorPawn) const;
+	float GetStaminaValue(APawn* SurvivorPawn) const;
+
+	float CalculateThreatLevel(
+		APawn* SurvivorPawn,
+		AActor* NearestZombie,
+		int32 NearbyZombieCount,
+		bool bNeedsHealing,
+		bool bHasWeapon) const;
+
+private:
+	// Stuck detection
+	bool bHasLastPawnLocation = false;
+	FVector LastPawnLocation = FVector::ZeroVector;
+	float TimeSinceMoved = 0.f;
 };

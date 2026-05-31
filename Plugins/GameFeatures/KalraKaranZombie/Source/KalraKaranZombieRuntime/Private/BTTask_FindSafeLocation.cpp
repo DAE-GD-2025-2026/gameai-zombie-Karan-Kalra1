@@ -13,6 +13,16 @@ EBTNodeResult::Type UBTTask_FindSafeLocation::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			1.f,
+			FColor::Cyan,
+			TEXT("Find Safe task is running")
+		);
+	}
+
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (!AIController || !AIController->GetPawn())
 		return EBTNodeResult::Failed;

@@ -16,6 +16,16 @@ EBTNodeResult::Type UBTTask_AttackZombie::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			1.f,
+			FColor::Red,
+			TEXT("AttackZombie task is running")
+		);
+	}
+
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	if (!AIController || !AIController->GetPawn())
 		return EBTNodeResult::Failed;
