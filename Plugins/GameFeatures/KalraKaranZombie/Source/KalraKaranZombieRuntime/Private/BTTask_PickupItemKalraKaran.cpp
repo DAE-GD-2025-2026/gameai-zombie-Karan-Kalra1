@@ -1,18 +1,18 @@
-#include "BTTask_PickupItem.h"
+#include "BTTask_PickupItemKalraKaran.h"
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 #include "Common/InventoryComponent.h"
 #include "Items/BaseItem.h"
-#include "../StudentPerceptor.h"
+#include "../StudentPerceptorKalraKaran.h"
 
-UBTTask_PickupItem::UBTTask_PickupItem()
+UBTTask_PickupItemKalraKaran::UBTTask_PickupItemKalraKaran()
 {
 	NodeName = TEXT("Pickup Item");
 }
 
-EBTNodeResult::Type UBTTask_PickupItem::ExecuteTask(
+EBTNodeResult::Type UBTTask_PickupItemKalraKaran::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {
@@ -89,12 +89,12 @@ EBTNodeResult::Type UBTTask_PickupItem::ExecuteTask(
 		}
 	}
 
-	UStudentPerceptor* Perceptor =
-		AIController->GetComponentByClass<UStudentPerceptor>();
+	UStudentPerceptorKalraKaran* Perceptor =
+		AIController->GetComponentByClass<UStudentPerceptorKalraKaran>();
 
 	if (!Perceptor && Pawn)
 	{
-		Perceptor = Pawn->GetComponentByClass<UStudentPerceptor>();
+		Perceptor = Pawn->GetComponentByClass<UStudentPerceptorKalraKaran>();
 	}
 
 	if (Perceptor)

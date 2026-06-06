@@ -2,21 +2,18 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_PickupItem.generated.h"
+#include "BTTask_UseFoodKalraKaran.generated.h"
 
 UCLASS()
-class KALRAKARANZOMBIERUNTIME_API UBTTask_PickupItem : public UBTTaskNode
+class KALRAKARANZOMBIERUNTIME_API UBTTask_UseFoodKalraKaran : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	UBTTask_PickupItem();
+	UBTTask_UseFoodKalraKaran();
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(
 		UBehaviorTreeComponent& OwnerComp,
 		uint8* NodeMemory) override;
-
-	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FName TargetItemKey = TEXT("TargetItem");
 };

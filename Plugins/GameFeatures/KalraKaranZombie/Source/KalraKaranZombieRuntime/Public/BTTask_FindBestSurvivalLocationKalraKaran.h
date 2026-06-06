@@ -2,17 +2,17 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_FindBestSurvivalLocation.generated.h"
+#include "BTTask_FindBestSurvivalLocationKalraKaran.generated.h"
 
-class UStudentPerceptor;
+class UStudentPerceptorKalraKaran;
 
 UCLASS()
-class KALRAKARANZOMBIERUNTIME_API UBTTask_FindBestSurvivalLocation : public UBTTaskNode
+class KALRAKARANZOMBIERUNTIME_API UBTTask_FindBestSurvivalLocationKalraKaran : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	UBTTask_FindBestSurvivalLocation();
+	UBTTask_FindBestSurvivalLocationKalraKaran();
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(
@@ -44,7 +44,7 @@ protected:
 	float NavProjectionExtent = 500.f;
 
 private:
-	UStudentPerceptor* GetPerceptor(AAIController* AIController, APawn* Pawn) const;
+	UStudentPerceptorKalraKaran* GetPerceptor(AAIController* AIController, APawn* Pawn) const;
 
 	bool TryUseActorLocation(
 		UBehaviorTreeComponent& OwnerComp,

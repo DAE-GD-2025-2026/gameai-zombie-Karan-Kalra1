@@ -2,15 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_FindSafeLocation.generated.h"
+#include "BTTask_MoveAsideKaranKalra.generated.h"
 
 UCLASS()
-class KALRAKARANZOMBIERUNTIME_API UBTTask_FindSafeLocation : public UBTTaskNode
+class KALRAKARANZOMBIERUNTIME_API UBTTask_MoveAsideKaranKalra : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	UBTTask_FindSafeLocation();
+	UBTTask_MoveAsideKaranKalra();
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(
@@ -23,6 +23,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FName SafeLocationKey = TEXT("SafeLocation");
 
-	UPROPERTY(EditAnywhere, Category = "Flee")
-	float FleeDistance = 1000.f;
+	UPROPERTY(EditAnywhere, Category = "Move Aside")
+	float StepDistance = 700.f;
+
+	UPROPERTY(EditAnywhere, Category = "Move Aside")
+	float NavProjectionExtent = 500.f;
 };

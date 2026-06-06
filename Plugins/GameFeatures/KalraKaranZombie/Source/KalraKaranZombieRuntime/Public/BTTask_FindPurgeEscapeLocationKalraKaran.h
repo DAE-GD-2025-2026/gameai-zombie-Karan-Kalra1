@@ -2,15 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_FindPurgeEscapeLocation.generated.h"
+#include "BTTask_FindPurgeEscapeLocationKalraKaran.generated.h"
 
 UCLASS()
-class KALRAKARANZOMBIERUNTIME_API UBTTask_FindPurgeEscapeLocation : public UBTTaskNode
+class KALRAKARANZOMBIERUNTIME_API UBTTask_FindPurgeEscapeLocationKalraKaran : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	UBTTask_FindPurgeEscapeLocation();
+	UBTTask_FindPurgeEscapeLocationKalraKaran();
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(

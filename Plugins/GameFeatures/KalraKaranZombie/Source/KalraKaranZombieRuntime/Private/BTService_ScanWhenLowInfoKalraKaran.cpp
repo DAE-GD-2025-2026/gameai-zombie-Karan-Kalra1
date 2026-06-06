@@ -1,11 +1,11 @@
-#include "BTService_ScanWhenLowInfo.h"
+#include "BTService_ScanWhenLowInfoKalraKaran.h"
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-#include "../StudentPerceptor.h"
+#include "../StudentPerceptorKalraKaran.h"
 
-UBTService_ScanWhenLowInfo::UBTService_ScanWhenLowInfo()
+UBTService_ScanWhenLowInfoKalraKaran::UBTService_ScanWhenLowInfoKalraKaran()
 {
 	NodeName = TEXT("Scan When Low Info");
 
@@ -14,7 +14,7 @@ UBTService_ScanWhenLowInfo::UBTService_ScanWhenLowInfo()
 	RandomDeviation = 0.15f;
 }
 
-void UBTService_ScanWhenLowInfo::TickNode(
+void UBTService_ScanWhenLowInfoKalraKaran::TickNode(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory,
 	float DeltaSeconds)
@@ -33,7 +33,7 @@ void UBTService_ScanWhenLowInfo::TickNode(
 	if (!BB)
 		return;
 
-	UStudentPerceptor* Perceptor = GetPerceptor(AIController, Pawn);
+	UStudentPerceptorKalraKaran* Perceptor = GetPerceptor(AIController, Pawn);
 
 	const bool bHasUsefulKnowledge =
 		HasUsefulKnowledge(OwnerComp, Perceptor, Pawn);
@@ -58,14 +58,14 @@ void UBTService_ScanWhenLowInfo::TickNode(
 	}
 }
 
-UStudentPerceptor* UBTService_ScanWhenLowInfo::GetPerceptor(
+UStudentPerceptorKalraKaran* UBTService_ScanWhenLowInfoKalraKaran::GetPerceptor(
 	AAIController* AIController,
 	APawn* Pawn) const
 {
 	if (AIController)
 	{
-		if (UStudentPerceptor* Perceptor =
-			AIController->GetComponentByClass<UStudentPerceptor>())
+		if (UStudentPerceptorKalraKaran* Perceptor =
+			AIController->GetComponentByClass<UStudentPerceptorKalraKaran>())
 		{
 			return Perceptor;
 		}
@@ -73,8 +73,8 @@ UStudentPerceptor* UBTService_ScanWhenLowInfo::GetPerceptor(
 
 	if (Pawn)
 	{
-		if (UStudentPerceptor* Perceptor =
-			Pawn->GetComponentByClass<UStudentPerceptor>())
+		if (UStudentPerceptorKalraKaran* Perceptor =
+			Pawn->GetComponentByClass<UStudentPerceptorKalraKaran>())
 		{
 			return Perceptor;
 		}
@@ -83,9 +83,9 @@ UStudentPerceptor* UBTService_ScanWhenLowInfo::GetPerceptor(
 	return nullptr;
 }
 
-bool UBTService_ScanWhenLowInfo::HasUsefulKnowledge(
+bool UBTService_ScanWhenLowInfoKalraKaran::HasUsefulKnowledge(
 	UBehaviorTreeComponent& OwnerComp,
-	UStudentPerceptor* Perceptor,
+	UStudentPerceptorKalraKaran* Perceptor,
 	APawn* Pawn) const
 {
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
@@ -123,7 +123,7 @@ bool UBTService_ScanWhenLowInfo::HasUsefulKnowledge(
 	return false;
 }
 
-void UBTService_ScanWhenLowInfo::RotatePawn(APawn* Pawn) const
+void UBTService_ScanWhenLowInfoKalraKaran::RotatePawn(APawn* Pawn) const
 {
 	if (!Pawn)
 		return;

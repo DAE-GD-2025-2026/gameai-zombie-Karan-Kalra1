@@ -1,4 +1,4 @@
-#include "BTTask_UseMedkit.h"
+#include "BTTask_UseMedkitKalraKaran.h"
 
 #include "AIController.h"
 
@@ -6,12 +6,12 @@
 #include "Items/BaseItem.h"
 #include "Items/ItemType.h"
 
-UBTTask_UseMedkit::UBTTask_UseMedkit()
+UBTTask_UseMedkitKalraKaran::UBTTask_UseMedkitKalraKaran()
 {
 	NodeName = TEXT("Use Medkit");
 }
 
-EBTNodeResult::Type UBTTask_UseMedkit::ExecuteTask(
+EBTNodeResult::Type UBTTask_UseMedkitKalraKaran::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {

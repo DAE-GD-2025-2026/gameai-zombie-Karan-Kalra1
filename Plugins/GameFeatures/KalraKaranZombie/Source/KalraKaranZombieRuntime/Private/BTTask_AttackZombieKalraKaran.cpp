@@ -1,4 +1,4 @@
-#include "BTTask_AttackZombie.h"
+#include "BTTask_AttackZombieKalraKaran.h"
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -7,12 +7,12 @@
 #include "Items/BaseItem.h"
 #include "Items/ItemType.h"
 
-UBTTask_AttackZombie::UBTTask_AttackZombie()
+UBTTask_AttackZombieKalraKaran::UBTTask_AttackZombieKalraKaran()
 {
 	NodeName = TEXT("Attack Zombie");
 }
 
-EBTNodeResult::Type UBTTask_AttackZombie::ExecuteTask(
+EBTNodeResult::Type UBTTask_AttackZombieKalraKaran::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {

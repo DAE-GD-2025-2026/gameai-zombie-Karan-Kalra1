@@ -1,18 +1,18 @@
-#include "BTTask_FindBestSurvivalLocation.h"
+#include "BTTask_FindBestSurvivalLocationKalraKaran.h"
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
 
-#include "../StudentPerceptor.h"
+#include "../StudentPerceptorKalraKaran.h"
 
-UBTTask_FindBestSurvivalLocation::UBTTask_FindBestSurvivalLocation()
+UBTTask_FindBestSurvivalLocationKalraKaran::UBTTask_FindBestSurvivalLocationKalraKaran()
 {
 	NodeName = TEXT("Find Best Survival Location");
 }
 
-EBTNodeResult::Type UBTTask_FindBestSurvivalLocation::ExecuteTask(
+EBTNodeResult::Type UBTTask_FindBestSurvivalLocationKalraKaran::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {
@@ -38,7 +38,7 @@ EBTNodeResult::Type UBTTask_FindBestSurvivalLocation::ExecuteTask(
 	if (!BB)
 		return EBTNodeResult::Failed;
 
-	UStudentPerceptor* Perceptor = GetPerceptor(AIController, Pawn);
+	UStudentPerceptorKalraKaran* Perceptor = GetPerceptor(AIController, Pawn);
 
 	const bool bNeedsHealing = BB->GetValueAsBool(NeedsHealingKey);
 	const bool bHasWeapon = BB->GetValueAsBool(HasWeaponKey);
@@ -142,14 +142,14 @@ EBTNodeResult::Type UBTTask_FindBestSurvivalLocation::ExecuteTask(
 	return EBTNodeResult::Failed;
 }
 
-UStudentPerceptor* UBTTask_FindBestSurvivalLocation::GetPerceptor(
+UStudentPerceptorKalraKaran* UBTTask_FindBestSurvivalLocationKalraKaran::GetPerceptor(
 	AAIController* AIController,
 	APawn* Pawn) const
 {
 	if (AIController)
 	{
-		if (UStudentPerceptor* Perceptor =
-			AIController->GetComponentByClass<UStudentPerceptor>())
+		if (UStudentPerceptorKalraKaran* Perceptor =
+			AIController->GetComponentByClass<UStudentPerceptorKalraKaran>())
 		{
 			return Perceptor;
 		}
@@ -157,8 +157,8 @@ UStudentPerceptor* UBTTask_FindBestSurvivalLocation::GetPerceptor(
 
 	if (Pawn)
 	{
-		if (UStudentPerceptor* Perceptor =
-			Pawn->GetComponentByClass<UStudentPerceptor>())
+		if (UStudentPerceptorKalraKaran* Perceptor =
+			Pawn->GetComponentByClass<UStudentPerceptorKalraKaran>())
 		{
 			return Perceptor;
 		}
@@ -167,7 +167,7 @@ UStudentPerceptor* UBTTask_FindBestSurvivalLocation::GetPerceptor(
 	return nullptr;
 }
 
-bool UBTTask_FindBestSurvivalLocation::TryUseActorLocation(
+bool UBTTask_FindBestSurvivalLocationKalraKaran::TryUseActorLocation(
 	UBehaviorTreeComponent& OwnerComp,
 	APawn* Pawn,
 	AActor* Actor,
@@ -230,7 +230,7 @@ bool UBTTask_FindBestSurvivalLocation::TryUseActorLocation(
 	return true;
 }
 
-bool UBTTask_FindBestSurvivalLocation::TryUseShelterLocation(
+bool UBTTask_FindBestSurvivalLocationKalraKaran::TryUseShelterLocation(
 	UBehaviorTreeComponent& OwnerComp,
 	APawn* Pawn,
 	AActor* ShelterActor,
@@ -302,7 +302,7 @@ bool UBTTask_FindBestSurvivalLocation::TryUseShelterLocation(
 	return true;
 }
 
-bool UBTTask_FindBestSurvivalLocation::TryFindPointAwayFromZombie(
+bool UBTTask_FindBestSurvivalLocationKalraKaran::TryFindPointAwayFromZombie(
 	UBehaviorTreeComponent& OwnerComp,
 	APawn* Pawn,
 	AActor* Zombie) const
@@ -423,7 +423,7 @@ bool UBTTask_FindBestSurvivalLocation::TryFindPointAwayFromZombie(
 	return false;
 }
 
-bool UBTTask_FindBestSurvivalLocation::TryFindRandomFallback(
+bool UBTTask_FindBestSurvivalLocationKalraKaran::TryFindRandomFallback(
 	UBehaviorTreeComponent& OwnerComp,
 	APawn* Pawn) const
 {

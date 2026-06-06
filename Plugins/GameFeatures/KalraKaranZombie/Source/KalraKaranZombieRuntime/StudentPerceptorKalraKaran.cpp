@@ -1,4 +1,4 @@
-﻿#include "StudentPerceptor.h"
+﻿#include "StudentPerceptorKalraKaran.h"
 
 #include "Engine/Engine.h"
 #include "GameFramework/Actor.h"
@@ -7,12 +7,12 @@
 #include "Items/BaseItem.h"
 #include "Items/ItemType.h"
 
-UStudentPerceptor::UStudentPerceptor()
+UStudentPerceptorKalraKaran::UStudentPerceptorKalraKaran()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UStudentPerceptor::BeginPlay()
+void UStudentPerceptorKalraKaran::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -22,7 +22,7 @@ void UStudentPerceptor::BeginPlay()
 	{
 		PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(
 			this,
-			&UStudentPerceptor::OnPerceptionUpdated);
+			&UStudentPerceptorKalraKaran::OnPerceptionUpdated);
 
 		DebugMessage(TEXT("StudentPerceptor connected to AIPerception"), FColor::Green);
 	}
@@ -32,7 +32,7 @@ void UStudentPerceptor::BeginPlay()
 	}
 }
 
-void UStudentPerceptor::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
+void UStudentPerceptorKalraKaran::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	if (!Actor)
 		return;
@@ -41,19 +41,36 @@ void UStudentPerceptor::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 
 	const EStudentMemoryType Type = ClassifyActor(Actor);
 
-	if (Stimulus.WasSuccessfullySensed())
+	const bool bWasSeen = Stimulus.WasSuccessfullySensed();
+	const bool bIsDamageStimulus =
+		Stimulus.Type == UAISense::GetSenseID<UAISense_Damage>();
+
+	// If the actor damaged us, remember it even if it is behind us.
+	if (bIsDamageStimulus)
 	{
 		AddOrUpdateMemory(Actor, Type, true);
 
 		DebugMessage(
-			FString::Printf(TEXT("Saw: %s"), *Actor->GetName()),
+			FString::Printf(TEXT("Damage threat remembered: %s Type=%d"),
+				*Actor->GetName(),
+				static_cast<int32>(Type)),
+			FColor::Red);
+
+		return;
+	}
+
+	if (bWasSeen)
+	{
+		AddOrUpdateMemory(Actor, Type, true);
+
+		DebugMessage(
+			FString::Printf(TEXT("Saw: %s Type=%d"),
+				*Actor->GetName(),
+				static_cast<int32>(Type)),
 			FColor::Green);
 	}
 	else
 	{
-		// Important:
-		// We do NOT forget the actor immediately.
-		// We remember its last known location.
 		MarkActorNotVisible(Actor);
 
 		DebugMessage(
@@ -62,7 +79,7 @@ void UStudentPerceptor::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 	}
 }
 
-void UStudentPerceptor::AddOrUpdateMemory(AActor* Actor, EStudentMemoryType Type, bool bVisible)
+void UStudentPerceptorKalraKaran::AddOrUpdateMemory(AActor* Actor, EStudentMemoryType Type, bool bVisible)
 {
 	if (!Actor)
 		return;
@@ -91,7 +108,7 @@ void UStudentPerceptor::AddOrUpdateMemory(AActor* Actor, EStudentMemoryType Type
 	Memory.Add(NewEntry);
 }
 
-void UStudentPerceptor::MarkActorNotVisible(AActor* Actor)
+void UStudentPerceptorKalraKaran::MarkActorNotVisible(AActor* Actor)
 {
 	if (!Actor)
 		return;
@@ -107,7 +124,7 @@ void UStudentPerceptor::MarkActorNotVisible(AActor* Actor)
 	}
 }
 
-void UStudentPerceptor::RemoveInvalidMemory()
+void UStudentPerceptorKalraKaran::RemoveInvalidMemory()
 {
 	Memory.RemoveAll(
 		[](const FStudentMemoryEntry& Entry)
@@ -116,7 +133,7 @@ void UStudentPerceptor::RemoveInvalidMemory()
 		});
 }
 
-int32 UStudentPerceptor::FindMemoryIndex(AActor* Actor) const
+int32 UStudentPerceptorKalraKaran::FindMemoryIndex(AActor* Actor) const
 {
 	if (!Actor)
 		return INDEX_NONE;
@@ -132,7 +149,7 @@ int32 UStudentPerceptor::FindMemoryIndex(AActor* Actor) const
 	return INDEX_NONE;
 }
 
-EStudentMemoryType UStudentPerceptor::ClassifyActor(AActor* Actor) const
+EStudentMemoryType UStudentPerceptorKalraKaran::ClassifyActor(AActor* Actor) const
 {
 	if (!Actor)
 		return EStudentMemoryType::Unknown;
@@ -168,17 +185,17 @@ EStudentMemoryType UStudentPerceptor::ClassifyActor(AActor* Actor) const
 	return EStudentMemoryType::Unknown;
 }
 
-bool UStudentPerceptor::IsZombie(AActor* Actor) const
+bool UStudentPerceptorKalraKaran::IsZombie(AActor* Actor) const
 {
 	return Actor && Actor->IsA(ABaseZombie::StaticClass());
 }
 
-bool UStudentPerceptor::IsItem(AActor* Actor) const
+bool UStudentPerceptorKalraKaran::IsItem(AActor* Actor) const
 {
 	return Actor && Actor->IsA(ABaseItem::StaticClass());
 }
 
-bool UStudentPerceptor::IsHouse(AActor* Actor) const
+bool UStudentPerceptorKalraKaran::IsHouse(AActor* Actor) const
 {
 	if (!Actor)
 		return false;
@@ -193,7 +210,7 @@ bool UStudentPerceptor::IsHouse(AActor* Actor) const
 		Name.Contains(TEXT("Village"));
 }
 
-AActor* UStudentPerceptor::GetBestUnvisitedHouse(const FVector& FromLocation) const
+AActor* UStudentPerceptorKalraKaran::GetBestUnvisitedHouse(const FVector& FromLocation) const
 {
 	AActor* BestHouse = nullptr;
 	float BestScore = -FLT_MAX;
@@ -225,7 +242,7 @@ AActor* UStudentPerceptor::GetBestUnvisitedHouse(const FVector& FromLocation) co
 	return BestHouse;
 }
 
-void UStudentPerceptor::MarkHouseVisited(AActor* HouseActor)
+void UStudentPerceptorKalraKaran::MarkHouseVisited(AActor* HouseActor)
 {
 	if (!HouseActor)
 		return;
@@ -242,7 +259,7 @@ void UStudentPerceptor::MarkHouseVisited(AActor* HouseActor)
 	}
 }
 
-void UStudentPerceptor::MarkHouseVisitedNearLocation(const FVector& Location, float Radius)
+void UStudentPerceptorKalraKaran::MarkHouseVisitedNearLocation(const FVector& Location, float Radius)
 {
 	const float RadiusSq = FMath::Square(Radius);
 
@@ -268,7 +285,7 @@ void UStudentPerceptor::MarkHouseVisitedNearLocation(const FVector& Location, fl
 	}
 }
 
-void UStudentPerceptor::AvoidActorForTime(AActor* Actor, float Duration)
+void UStudentPerceptorKalraKaran::AvoidActorForTime(AActor* Actor, float Duration)
 {
 	if (!Actor)
 		return;
@@ -285,13 +302,13 @@ void UStudentPerceptor::AvoidActorForTime(AActor* Actor, float Duration)
 	}
 }
 
-bool UStudentPerceptor::IsMemoryAvoided(const FStudentMemoryEntry& Entry) const
+bool UStudentPerceptorKalraKaran::IsMemoryAvoided(const FStudentMemoryEntry& Entry) const
 {
 	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
 	return Now < Entry.AvoidUntilTime;
 }
 
-AActor* UStudentPerceptor::GetNearestKnownZombie(const FVector& FromLocation, bool bOnlyVisible) const
+AActor* UStudentPerceptorKalraKaran::GetNearestKnownZombie(const FVector& FromLocation, bool bOnlyVisible) const
 {
 	AActor* BestZombie = nullptr;
 	float BestDistSq = TNumericLimits<float>::Max();
@@ -320,7 +337,7 @@ AActor* UStudentPerceptor::GetNearestKnownZombie(const FVector& FromLocation, bo
 	return BestZombie;
 }
 
-void UStudentPerceptor::IgnoreActorForTime(AActor* Actor, float Duration)
+void UStudentPerceptorKalraKaran::IgnoreActorForTime(AActor* Actor, float Duration)
 {
 	if (!Actor)
 		return;
@@ -337,7 +354,7 @@ void UStudentPerceptor::IgnoreActorForTime(AActor* Actor, float Duration)
 	}
 }
 
-AActor* UStudentPerceptor::GetBestKnownItem(
+AActor* UStudentPerceptorKalraKaran::GetBestKnownItem(
 	const FVector& FromLocation,
 	bool bNeedsHealing,
 	bool bNeedsStamina,
@@ -378,7 +395,37 @@ AActor* UStudentPerceptor::GetBestKnownItem(
 	return BestItem;
 }
 
-AActor* UStudentPerceptor::GetBestKnownWeapon(const FVector& FromLocation) const
+
+AActor* UStudentPerceptorKalraKaran::GetBestKnownGarbage(const FVector& FromLocation) const
+{
+	AActor* BestGarbage = nullptr;
+	float BestScore = -FLT_MAX;
+
+	for (const FStudentMemoryEntry& Entry : Memory)
+	{
+		if (Entry.Type != EStudentMemoryType::Garbage)
+			continue;
+
+		if (IsMemoryAvoided(Entry))
+			continue;
+
+		AActor* GarbageActor = Entry.Actor.Get();
+		if (!GarbageActor)
+			continue;
+
+		const float Score = DistanceScore(FromLocation, Entry.LastKnownLocation);
+
+		if (Score > BestScore)
+		{
+			BestScore = Score;
+			BestGarbage = GarbageActor;
+		}
+	}
+
+	return BestGarbage;
+}
+
+AActor* UStudentPerceptorKalraKaran::GetBestKnownWeapon(const FVector& FromLocation) const
 {
 	AActor* BestWeapon = nullptr;
 	float BestScore = -FLT_MAX;
@@ -404,7 +451,7 @@ AActor* UStudentPerceptor::GetBestKnownWeapon(const FVector& FromLocation) const
 	return BestWeapon;
 }
 
-AActor* UStudentPerceptor::GetBestKnownMedkit(const FVector& FromLocation) const
+AActor* UStudentPerceptorKalraKaran::GetBestKnownMedkit(const FVector& FromLocation) const
 {
 	AActor* BestMedkit = nullptr;
 	float BestScore = -FLT_MAX;
@@ -430,7 +477,7 @@ AActor* UStudentPerceptor::GetBestKnownMedkit(const FVector& FromLocation) const
 	return BestMedkit;
 }
 
-AActor* UStudentPerceptor::GetBestKnownFood(const FVector& FromLocation) const
+AActor* UStudentPerceptorKalraKaran::GetBestKnownFood(const FVector& FromLocation) const
 {
 	AActor* BestFood = nullptr;
 	float BestScore = -FLT_MAX;
@@ -456,7 +503,7 @@ AActor* UStudentPerceptor::GetBestKnownFood(const FVector& FromLocation) const
 	return BestFood;
 }
 
-AActor* UStudentPerceptor::GetBestKnownHouse(const FVector& FromLocation) const
+AActor* UStudentPerceptorKalraKaran::GetBestKnownHouse(const FVector& FromLocation) const
 {
 	AActor* BestHouse = nullptr;
 	float BestScore = -FLT_MAX;
@@ -482,7 +529,7 @@ AActor* UStudentPerceptor::GetBestKnownHouse(const FVector& FromLocation) const
 	return BestHouse;
 }
 
-bool UStudentPerceptor::GetBestKnownLocationOfType(
+bool UStudentPerceptorKalraKaran::GetBestKnownLocationOfType(
 	EStudentMemoryType Type,
 	const FVector& FromLocation,
 	FVector& OutLocation) const
@@ -508,7 +555,7 @@ bool UStudentPerceptor::GetBestKnownLocationOfType(
 	return bFound;
 }
 
-int32 UStudentPerceptor::GetKnownZombieCount(float MaxDistance, const FVector& FromLocation) const
+int32 UStudentPerceptorKalraKaran::GetKnownZombieCount(float MaxDistance, const FVector& FromLocation) const
 {
 	int32 Count = 0;
 	const float MaxDistSq = FMath::Square(MaxDistance);
@@ -527,7 +574,7 @@ int32 UStudentPerceptor::GetKnownZombieCount(float MaxDistance, const FVector& F
 	return Count;
 }
 
-float UStudentPerceptor::ScoreItem(
+float UStudentPerceptorKalraKaran::ScoreItem(
 	AActor* ItemActor,
 	const FVector& FromLocation,
 	bool bNeedsHealing,
@@ -570,13 +617,13 @@ float UStudentPerceptor::ScoreItem(
 	return Score;
 }
 
-float UStudentPerceptor::DistanceScore(const FVector& FromLocation, const FVector& TargetLocation) const
+float UStudentPerceptorKalraKaran::DistanceScore(const FVector& FromLocation, const FVector& TargetLocation) const
 {
 	const float Distance = FVector::Dist(FromLocation, TargetLocation);
 	return 1000.f / FMath::Max(Distance, 1.f);
 }
 
-void UStudentPerceptor::DebugMessage(const FString& Message, const FColor& Color) const
+void UStudentPerceptorKalraKaran::DebugMessage(const FString& Message, const FColor& Color) const
 {
 	if (!bDebugMessages || !GEngine)
 		return;

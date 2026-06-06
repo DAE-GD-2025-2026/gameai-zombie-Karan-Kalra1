@@ -4,7 +4,8 @@
 #include "Components/ActorComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
-#include "StudentPerceptor.generated.h"
+#include "Perception/AISense_Damage.h"
+#include "StudentPerceptorKalraKaran.generated.h"
 
 class ABaseZombie;
 class ABaseItem;
@@ -49,12 +50,12 @@ struct FStudentMemoryEntry
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class KALRAKARANZOMBIERUNTIME_API UStudentPerceptor : public UActorComponent
+class KALRAKARANZOMBIERUNTIME_API UStudentPerceptorKalraKaran : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	UStudentPerceptor();
+	UStudentPerceptorKalraKaran();
 
 	virtual void BeginPlay() override;
 
@@ -75,6 +76,7 @@ public:
 	AActor* GetBestKnownMedkit(const FVector& FromLocation) const;
 	AActor* GetBestKnownFood(const FVector& FromLocation) const;
 	AActor* GetBestKnownHouse(const FVector& FromLocation) const;
+	AActor* GetBestKnownGarbage(const FVector& FromLocation) const;
 
 	AActor* GetBestUnvisitedHouse(const FVector& FromLocation) const;
 

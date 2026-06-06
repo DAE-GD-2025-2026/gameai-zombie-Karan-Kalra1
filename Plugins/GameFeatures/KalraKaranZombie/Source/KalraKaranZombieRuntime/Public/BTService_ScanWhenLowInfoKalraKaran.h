@@ -2,17 +2,17 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
-#include "BTService_ScanWhenLowInfo.generated.h"
+#include "BTService_ScanWhenLowInfoKalraKaran.generated.h"
 
-class UStudentPerceptor;
+class UStudentPerceptorKalraKaran;
 
 UCLASS()
-class KALRAKARANZOMBIERUNTIME_API UBTService_ScanWhenLowInfo : public UBTService
+class KALRAKARANZOMBIERUNTIME_API UBTService_ScanWhenLowInfoKalraKaran : public UBTService
 {
 	GENERATED_BODY()
 
 public:
-	UBTService_ScanWhenLowInfo();
+	UBTService_ScanWhenLowInfoKalraKaran();
 
 protected:
 	virtual void TickNode(
@@ -30,11 +30,11 @@ protected:
 	bool bDebugScan = false;
 
 private:
-	UStudentPerceptor* GetPerceptor(AAIController* AIController, APawn* Pawn) const;
+	UStudentPerceptorKalraKaran* GetPerceptor(AAIController* AIController, APawn* Pawn) const;
 
 	bool HasUsefulKnowledge(
 		UBehaviorTreeComponent& OwnerComp,
-		UStudentPerceptor* Perceptor,
+		UStudentPerceptorKalraKaran* Perceptor,
 		APawn* Pawn) const;
 
 	void RotatePawn(APawn* Pawn) const;

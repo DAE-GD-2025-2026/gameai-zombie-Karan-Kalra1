@@ -2,15 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_ScanForTargets.generated.h"
+#include "BTTask_ScanForTargetsKalraKaran.generated.h"
 
 UCLASS()
-class KALRAKARANZOMBIERUNTIME_API UBTTask_ScanForTargets : public UBTTaskNode
+class KALRAKARANZOMBIERUNTIME_API UBTTask_ScanForTargetsKalraKaran : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	UBTTask_ScanForTargets();
+	UBTTask_ScanForTargetsKalraKaran();
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(

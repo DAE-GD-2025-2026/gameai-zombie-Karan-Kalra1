@@ -1,15 +1,15 @@
-#include "BTTask_FindSafeLocation.h"
+#include "BTTask_FindSafeLocationKalraKaran.h"
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
 
-UBTTask_FindSafeLocation::UBTTask_FindSafeLocation()
+UBTTask_FindSafeLocationKalraKaran::UBTTask_FindSafeLocationKalraKaran()
 {
 	NodeName = TEXT("Find Safe Location");
 }
 
-EBTNodeResult::Type UBTTask_FindSafeLocation::ExecuteTask(
+EBTNodeResult::Type UBTTask_FindSafeLocationKalraKaran::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {

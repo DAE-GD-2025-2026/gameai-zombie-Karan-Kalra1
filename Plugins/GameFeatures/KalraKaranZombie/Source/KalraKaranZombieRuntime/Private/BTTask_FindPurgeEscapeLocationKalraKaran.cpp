@@ -1,16 +1,16 @@
-#include "BTTask_FindPurgeEscapeLocation.h"
+#include "BTTask_FindPurgeEscapeLocationKalraKaran.h"
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
 
-UBTTask_FindPurgeEscapeLocation::UBTTask_FindPurgeEscapeLocation()
+UBTTask_FindPurgeEscapeLocationKalraKaran::UBTTask_FindPurgeEscapeLocationKalraKaran()
 {
 	NodeName = TEXT("Find Purge Escape Location");
 }
 
-EBTNodeResult::Type UBTTask_FindPurgeEscapeLocation::ExecuteTask(
+EBTNodeResult::Type UBTTask_FindPurgeEscapeLocationKalraKaran::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {

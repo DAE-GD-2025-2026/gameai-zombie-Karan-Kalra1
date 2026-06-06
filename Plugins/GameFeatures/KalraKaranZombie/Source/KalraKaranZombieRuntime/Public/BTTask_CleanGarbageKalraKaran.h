@@ -2,15 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_MarkHouseVisited.generated.h"
+#include "BTTask_CleanGarbageKalraKaran.generated.h"
 
 UCLASS()
-class KALRAKARANZOMBIERUNTIME_API UBTTask_MarkHouseVisited : public UBTTaskNode
+class KALRAKARANZOMBIERUNTIME_API UBTTask_CleanGarbageKalraKaran : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	UBTTask_MarkHouseVisited();
+	UBTTask_CleanGarbageKalraKaran();
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(
@@ -18,5 +18,5 @@ protected:
 		uint8* NodeMemory) override;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FName TargetHouseKey = TEXT("TargetHouse");
+	FName TargetGarbageKey = TEXT("TargetGarbage");
 };

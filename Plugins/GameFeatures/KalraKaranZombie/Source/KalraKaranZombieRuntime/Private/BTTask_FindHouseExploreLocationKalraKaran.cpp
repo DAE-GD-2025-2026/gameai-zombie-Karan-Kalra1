@@ -1,17 +1,17 @@
-#include "BTTask_FindHouseExploreLocation.h"
+#include "BTTask_FindHouseExploreLocationKalraKaran.h"
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
 
-#include "../StudentPerceptor.h"
+#include "../StudentPerceptorKalraKaran.h"
 
-UBTTask_FindHouseExploreLocation::UBTTask_FindHouseExploreLocation()
+UBTTask_FindHouseExploreLocationKalraKaran::UBTTask_FindHouseExploreLocationKalraKaran()
 {
 	NodeName = TEXT("Find House Explore Location");
 }
 
-EBTNodeResult::Type UBTTask_FindHouseExploreLocation::ExecuteTask(
+EBTNodeResult::Type UBTTask_FindHouseExploreLocationKalraKaran::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {
@@ -41,7 +41,7 @@ EBTNodeResult::Type UBTTask_FindHouseExploreLocation::ExecuteTask(
 	if (!Pawn)
 		return EBTNodeResult::Failed;
 
-	UStudentPerceptor* Perceptor = GetPerceptor(AIController, Pawn);
+	UStudentPerceptorKalraKaran* Perceptor = GetPerceptor(AIController, Pawn);
 
 	// First priority go to a remembered house.
 	if (Perceptor && TryUseKnownHouse(OwnerComp, Pawn, Perceptor))
@@ -58,14 +58,14 @@ EBTNodeResult::Type UBTTask_FindHouseExploreLocation::ExecuteTask(
 	return EBTNodeResult::Failed;
 }
 
-UStudentPerceptor* UBTTask_FindHouseExploreLocation::GetPerceptor(
+UStudentPerceptorKalraKaran* UBTTask_FindHouseExploreLocationKalraKaran::GetPerceptor(
 	AAIController* AIController,
 	APawn* Pawn) const
 {
 	if (AIController)
 	{
-		if (UStudentPerceptor* Perceptor =
-			AIController->GetComponentByClass<UStudentPerceptor>())
+		if (UStudentPerceptorKalraKaran* Perceptor =
+			AIController->GetComponentByClass<UStudentPerceptorKalraKaran>())
 		{
 			return Perceptor;
 		}
@@ -73,8 +73,8 @@ UStudentPerceptor* UBTTask_FindHouseExploreLocation::GetPerceptor(
 
 	if (Pawn)
 	{
-		if (UStudentPerceptor* Perceptor =
-			Pawn->GetComponentByClass<UStudentPerceptor>())
+		if (UStudentPerceptorKalraKaran* Perceptor =
+			Pawn->GetComponentByClass<UStudentPerceptorKalraKaran>())
 		{
 			return Perceptor;
 		}
@@ -83,10 +83,10 @@ UStudentPerceptor* UBTTask_FindHouseExploreLocation::GetPerceptor(
 	return nullptr;
 }
 
-bool UBTTask_FindHouseExploreLocation::TryUseKnownHouse(
+bool UBTTask_FindHouseExploreLocationKalraKaran::TryUseKnownHouse(
 	UBehaviorTreeComponent& OwnerComp,
 	APawn* Pawn,
-	UStudentPerceptor* Perceptor) const
+	UStudentPerceptorKalraKaran* Perceptor) const
 {
 	if (!Pawn || !Perceptor)
 		return false;
@@ -146,7 +146,7 @@ bool UBTTask_FindHouseExploreLocation::TryUseKnownHouse(
 	return false;
 }
 
-bool UBTTask_FindHouseExploreLocation::TryUseRandomReachablePoint(
+bool UBTTask_FindHouseExploreLocationKalraKaran::TryUseRandomReachablePoint(
 	UBehaviorTreeComponent& OwnerComp,
 	APawn* Pawn) const
 {

@@ -2,17 +2,17 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_FindHouseExploreLocation.generated.h"
+#include "BTTask_FindHouseExploreLocationKalraKaran.generated.h"
 
-class UStudentPerceptor;
+class UStudentPerceptorKalraKaran;
 
 UCLASS()
-class KALRAKARANZOMBIERUNTIME_API UBTTask_FindHouseExploreLocation : public UBTTaskNode
+class KALRAKARANZOMBIERUNTIME_API UBTTask_FindHouseExploreLocationKalraKaran : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	UBTTask_FindHouseExploreLocation();
+	UBTTask_FindHouseExploreLocationKalraKaran();
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(
@@ -32,12 +32,12 @@ protected:
 	float NavProjectionExtent = 500.f;
 
 private:
-	UStudentPerceptor* GetPerceptor(AAIController* AIController, APawn* Pawn) const;
+	UStudentPerceptorKalraKaran* GetPerceptor(AAIController* AIController, APawn* Pawn) const;
 
 	bool TryUseKnownHouse(
 		UBehaviorTreeComponent& OwnerComp,
 		APawn* Pawn,
-		UStudentPerceptor* Perceptor) const;
+		UStudentPerceptorKalraKaran* Perceptor) const;
 
 	bool TryUseRandomReachablePoint(
 		UBehaviorTreeComponent& OwnerComp,

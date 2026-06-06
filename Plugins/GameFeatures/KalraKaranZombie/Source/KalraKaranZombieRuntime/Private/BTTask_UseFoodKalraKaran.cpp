@@ -1,4 +1,4 @@
-#include "BTTask_UseFood.h"
+#include "BTTask_UseFoodKalraKaran.h"
 
 #include "AIController.h"
 
@@ -6,12 +6,12 @@
 #include "Items/BaseItem.h"
 #include "Items/ItemType.h"
 
-UBTTask_UseFood::UBTTask_UseFood()
+UBTTask_UseFoodKalraKaran::UBTTask_UseFoodKalraKaran()
 {
 	NodeName = TEXT("Use Food");
 }
 
-EBTNodeResult::Type UBTTask_UseFood::ExecuteTask(
+EBTNodeResult::Type UBTTask_UseFoodKalraKaran::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {

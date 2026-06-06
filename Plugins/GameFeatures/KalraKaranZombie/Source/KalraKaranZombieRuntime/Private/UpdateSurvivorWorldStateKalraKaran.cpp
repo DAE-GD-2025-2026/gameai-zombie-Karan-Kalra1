@@ -1,9 +1,9 @@
-#include "UpdateSurvivorWorldState.h"
+#include "UpdateSurvivorWorldStateKalraKaran.h"
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-#include "../StudentPerceptor.h"
+#include "../StudentPerceptorKalraKaran.h"
 
 
 #include "Survivor/SurvivorPawn.h"
@@ -15,7 +15,7 @@
 #include "Common/InventoryComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-UUpdateSurvivorWorldState::UUpdateSurvivorWorldState()
+UUpdateSurvivorWorldStateKalraKaran::UUpdateSurvivorWorldStateKalraKaran()
 {
 	NodeName = TEXT("Update Survivor World State");
 	Interval = 0.25f;
@@ -25,7 +25,7 @@ UUpdateSurvivorWorldState::UUpdateSurvivorWorldState()
 	bCreateNodeInstance = true;
 }
 
-void UUpdateSurvivorWorldState::TickNode(
+void UUpdateSurvivorWorldStateKalraKaran::TickNode(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory,
 	float DeltaSeconds)
@@ -44,10 +44,44 @@ void UUpdateSurvivorWorldState::TickNode(
 	if (!BB)
 		return;
 
-	UStudentPerceptor* Perceptor = GetPerceptor(AIController, Pawn);
+	UStudentPerceptorKalraKaran* Perceptor = GetPerceptor(AIController, Pawn);
 
 	const float HealthValue = GetHealthValue(Pawn);
 	const float StaminaValue = GetStaminaValue(Pawn);
+
+
+	bool bRecentlyDamaged = false;
+
+	if (!bHasPreviousHealth)
+	{
+		PreviousHealthValue = HealthValue;
+		bHasPreviousHealth = true;
+	}
+	else
+	{
+		if (HealthValue < PreviousHealthValue - 0.01f)
+		{
+			RecentlyDamagedTimer = 2.0f;
+
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					1.f,
+					FColor::Red,
+					TEXT("Survivor took damage!")
+				);
+			}
+		}
+
+		PreviousHealthValue = HealthValue;
+	}
+
+	if (RecentlyDamagedTimer > 0.f)
+	{
+		RecentlyDamagedTimer -= DeltaSeconds;
+		bRecentlyDamaged = true;
+	}
 
 	
 	const bool bNeedsHealing = HealthValue < 4.5f;
@@ -60,6 +94,7 @@ void UUpdateSurvivorWorldState::TickNode(
 
 	AActor* NearestZombie = nullptr;
 	AActor* BestItem = nullptr;
+	AActor* BestGarbage = nullptr;
 
 	int32 NearbyZombieCount = 0;
 
@@ -86,10 +121,13 @@ void UUpdateSurvivorWorldState::TickNode(
 				bNeedsStamina,
 				bHasWeapon
 			);
+
+			BestGarbage = Perceptor->GetBestKnownGarbage(PawnLocation);
 		}
 		else
 		{
 			BestItem = nullptr;
+			BestGarbage = nullptr;
 		}
 
 		NearbyZombieCount = Perceptor->GetKnownZombieCount(1000.f, PawnLocation);
@@ -153,6 +191,7 @@ void UUpdateSurvivorWorldState::TickNode(
 	const bool bIsInDanger =
 		!bShouldFinishPickup &&
 		(
+			bRecentlyDamaged ||
 			bExtremeThreat ||
 			bDangerNoWeapon ||
 			bDangerLowHealth ||
@@ -188,6 +227,9 @@ void UUpdateSurvivorWorldState::TickNode(
 
 	const bool bIsStuck = TimeSinceMoved > 3.f;
 
+	const bool bIsBlockedWhileFleeing =
+		bIsInDanger && TimeSinceMoved > 0.5f;
+
 	// ---------------------------------------------------------------------
 	// Blackboard updates
 	// ---------------------------------------------------------------------
@@ -220,6 +262,17 @@ void UUpdateSurvivorWorldState::TickNode(
 
 	BB->SetValueAsFloat(TEXT("ThreatLevel"), ThreatLevel);
 	BB->SetValueAsInt(TEXT("NearbyZombieCount"), NearbyZombieCount);
+	BB->SetValueAsBool(TEXT("RecentlyDamaged"), bRecentlyDamaged);
+	BB->SetValueAsBool(TEXT("IsBlockedWhileFleeing"), bIsBlockedWhileFleeing);
+
+	if (bInventoryFull)
+	{
+		BB->ClearValue(TEXT("TargetGarbage"));
+	}
+	else
+	{
+		BB->SetValueAsObject(TEXT("TargetGarbage"), BestGarbage);
+	}
 
 	if (bHasKnownMedkitLocation)
 	{
@@ -237,14 +290,14 @@ void UUpdateSurvivorWorldState::TickNode(
 	}
 }
 
-UStudentPerceptor* UUpdateSurvivorWorldState::GetPerceptor(
+UStudentPerceptorKalraKaran* UUpdateSurvivorWorldStateKalraKaran::GetPerceptor(
 	AAIController* AIController,
 	APawn* Pawn) const
 {
 	if (AIController)
 	{
-		if (UStudentPerceptor* Perceptor =
-			AIController->GetComponentByClass<UStudentPerceptor>())
+		if (UStudentPerceptorKalraKaran* Perceptor =
+			AIController->GetComponentByClass<UStudentPerceptorKalraKaran>())
 		{
 			return Perceptor;
 		}
@@ -252,8 +305,8 @@ UStudentPerceptor* UUpdateSurvivorWorldState::GetPerceptor(
 
 	if (Pawn)
 	{
-		if (UStudentPerceptor* Perceptor =
-			Pawn->GetComponentByClass<UStudentPerceptor>())
+		if (UStudentPerceptorKalraKaran* Perceptor =
+			Pawn->GetComponentByClass<UStudentPerceptorKalraKaran>())
 		{
 			return Perceptor;
 		}
@@ -262,7 +315,7 @@ UStudentPerceptor* UUpdateSurvivorWorldState::GetPerceptor(
 	return nullptr;
 }
 
-bool UUpdateSurvivorWorldState::HasUsefulWeapon(APawn* SurvivorPawn) const
+bool UUpdateSurvivorWorldStateKalraKaran::HasUsefulWeapon(APawn* SurvivorPawn) const
 {
 	if (!SurvivorPawn)
 		return false;
@@ -290,7 +343,7 @@ bool UUpdateSurvivorWorldState::HasUsefulWeapon(APawn* SurvivorPawn) const
 	return false;
 }
 
-bool UUpdateSurvivorWorldState::HasItemType(
+bool UUpdateSurvivorWorldStateKalraKaran::HasItemType(
 	APawn* SurvivorPawn,
 	const FString& ItemTypeName) const
 {
@@ -327,7 +380,7 @@ bool UUpdateSurvivorWorldState::HasItemType(
 	return false;
 }
 
-float UUpdateSurvivorWorldState::GetHealthValue(APawn* SurvivorPawn) const
+float UUpdateSurvivorWorldStateKalraKaran::GetHealthValue(APawn* SurvivorPawn) const
 {
 	if (!SurvivorPawn)
 		return 100.f;
@@ -341,7 +394,7 @@ float UUpdateSurvivorWorldState::GetHealthValue(APawn* SurvivorPawn) const
 	return 100.f;
 }
 
-float UUpdateSurvivorWorldState::GetStaminaValue(APawn* SurvivorPawn) const
+float UUpdateSurvivorWorldStateKalraKaran::GetStaminaValue(APawn* SurvivorPawn) const
 {
 	if (!SurvivorPawn)
 		return 100.f;
@@ -357,7 +410,7 @@ float UUpdateSurvivorWorldState::GetStaminaValue(APawn* SurvivorPawn) const
 
 
 
-float UUpdateSurvivorWorldState::CalculateThreatLevel(
+float UUpdateSurvivorWorldStateKalraKaran::CalculateThreatLevel(
 	APawn* SurvivorPawn,
 	AActor* NearestZombie,
 	int32 NearbyZombieCount,
@@ -410,7 +463,7 @@ float UUpdateSurvivorWorldState::CalculateThreatLevel(
 	return FMath::Clamp(Threat, 0.f, 1.f);
 }
 
-bool UUpdateSurvivorWorldState::IsInventoryFull(APawn* SurvivorPawn) const
+bool UUpdateSurvivorWorldStateKalraKaran::IsInventoryFull(APawn* SurvivorPawn) const
 {
 	if (!SurvivorPawn)
 		return true;

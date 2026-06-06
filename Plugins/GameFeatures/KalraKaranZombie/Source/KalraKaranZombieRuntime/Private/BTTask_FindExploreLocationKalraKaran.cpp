@@ -1,15 +1,15 @@
-#include "BTTask_FindExploreLocation.h"
+#include "BTTask_FindExploreLocationKalraKaran.h"
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
 
-UBTTask_FindExploreLocation::UBTTask_FindExploreLocation()
+UBTTask_FindExploreLocationKalraKaran::UBTTask_FindExploreLocationKalraKaran()
 {
 	NodeName = TEXT("Find Explore Location");
 }
 
-EBTNodeResult::Type UBTTask_FindExploreLocation::ExecuteTask(
+EBTNodeResult::Type UBTTask_FindExploreLocationKalraKaran::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {

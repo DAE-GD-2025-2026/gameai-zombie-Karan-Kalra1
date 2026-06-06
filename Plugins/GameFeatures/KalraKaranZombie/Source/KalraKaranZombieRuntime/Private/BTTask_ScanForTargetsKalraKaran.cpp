@@ -1,13 +1,13 @@
-#include "BTTask_ScanForTargets.h"
+#include "BTTask_ScanForTargetsKalraKaran.h"
 
 #include "AIController.h"
 
-UBTTask_ScanForTargets::UBTTask_ScanForTargets()
+UBTTask_ScanForTargetsKalraKaran::UBTTask_ScanForTargetsKalraKaran()
 {
 	NodeName = TEXT("Scan For Targets");
 }
 
-EBTNodeResult::Type UBTTask_ScanForTargets::ExecuteTask(
+EBTNodeResult::Type UBTTask_ScanForTargetsKalraKaran::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {

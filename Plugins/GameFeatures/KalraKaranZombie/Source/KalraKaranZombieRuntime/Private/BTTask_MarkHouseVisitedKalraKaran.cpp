@@ -1,15 +1,15 @@
-#include "BTTask_MarkHouseVisited.h"
+#include "BTTask_MarkHouseVisitedKalraKaran.h"
 
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "../StudentPerceptor.h"
+#include "../StudentPerceptorKalraKaran.h"
 
-UBTTask_MarkHouseVisited::UBTTask_MarkHouseVisited()
+UBTTask_MarkHouseVisitedKalraKaran::UBTTask_MarkHouseVisitedKalraKaran()
 {
 	NodeName = TEXT("Mark House Visited");
 }
 
-EBTNodeResult::Type UBTTask_MarkHouseVisited::ExecuteTask(
+EBTNodeResult::Type UBTTask_MarkHouseVisitedKalraKaran::ExecuteTask(
 	UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory)
 {
@@ -25,12 +25,12 @@ EBTNodeResult::Type UBTTask_MarkHouseVisited::ExecuteTask(
 	if (!House)
 		return EBTNodeResult::Failed;
 
-	UStudentPerceptor* Perceptor =
-		AIController->GetComponentByClass<UStudentPerceptor>();
+	UStudentPerceptorKalraKaran* Perceptor =
+		AIController->GetComponentByClass<UStudentPerceptorKalraKaran>();
 
 	if (!Perceptor && AIController->GetPawn())
 	{
-		Perceptor = AIController->GetPawn()->GetComponentByClass<UStudentPerceptor>();
+		Perceptor = AIController->GetPawn()->GetComponentByClass<UStudentPerceptorKalraKaran>();
 	}
 
 	if (!Perceptor)
